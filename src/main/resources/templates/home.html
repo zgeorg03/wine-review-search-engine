@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+
+    <title>Dionysos | Search Engine</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/home.css}"/>
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+</head>
+
+<body>
+
+<div id="wrapper" class="toggled">
+
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar-brand">
+                <a href="#">
+                    Dionysos: Wine Search
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" onclick="loadCollections()"> Collections</a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" onclick="searchCollection()"> Search</a>
+            </li>
+        </ul>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <h1>Dionysos: Wine Review Search Engine</h1>
+                <hr/>
+                <div id="view">
+
+                </div>
+        </div>
+    </div>
+
+    <div id="modal-info" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div id="modal-content" class="modal-content">
+                <div class="modal-header" id="modal-header"></div>
+                <div id="modal-body" class="modal-body"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/js/tether.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+</body>
+
+</html>
