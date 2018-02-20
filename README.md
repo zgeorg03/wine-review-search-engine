@@ -28,11 +28,11 @@ mvn clean && mvn package
 ```bash
 java -jar target/wine-search-engine-0.1.0.jar
 ```
-**Important** Make sure you have changed application.properties file which is located under resources/ directory.
+**Important** Make sure you have changed application.properties file which is located in the root directory.
 This file has 3 configuration properties:
 * The port of the server: Default is 8192
 * The local directory path to store collections: Default is /tmp/wines
-* The path to stopwords file: Default is /home/zgeorg03/git-projects/Msc/dionysos-wine-review-search-engine/data/stoplist.txt
+* The path to stopwords file: Default is ./data/stoplist.txt
 
 ### How to use?
 You can simply visit http://localhost:8192 which redirects to the swagger-ui. From there you 
