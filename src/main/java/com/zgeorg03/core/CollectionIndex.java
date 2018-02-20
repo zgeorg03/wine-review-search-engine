@@ -3,15 +3,13 @@ package com.zgeorg03.core;
 import com.zgeorg03.StemmerService;
 import com.zgeorg03.StopListService;
 import com.zgeorg03.exceptions.QueryFormatNotValid;
+import com.zgeorg03.models.PositionsEntry;
 import com.zgeorg03.models.PostingList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 public class CollectionIndex implements Serializable{
     private static final Logger logger = LoggerFactory.getLogger(CollectionIndex.class);
@@ -101,9 +99,7 @@ public class CollectionIndex implements Serializable{
             } else
                 docs = getNotIncludedDocs(term);
 
-            if(lastBoolOperation == Query.BoolOperation.NONE){
-                //Nothing to do
-            }else if(lastBoolOperation == Query.BoolOperation.AND){
+            if(lastBoolOperation == Query.BoolOperation.AND){
                 docs = Utils.intersectSortedSets(lastDocs,docs);
             }else if(lastBoolOperation == Query.BoolOperation.OR){
                 docs = Utils.unionSortedSets(lastDocs,docs);
@@ -152,5 +148,30 @@ public class CollectionIndex implements Serializable{
         }
 
         return lastDocs;
+    }
+
+    public void removeDocument(Integer id) {
+        documents.remove(id);
+        Iterator<Map.Entry<String,PostingList>> termIterator = dictionary.entrySet().iterator();
+        while(termIterator.hasNext()){
+            Map.Entry<String,PostingList> entry =termIterator.next();
+            Iterator<Map.Entry<Integer,PositionsEntry>> postingsIterator = entry.getValue().getDocuments().entrySet().iterator();
+            while (postingsIterator.hasNext()){
+                Map.Entry<Integer,PositionsEntry> posting =postingsIterator.next();
+                //If a match, remove
+                if(id == posting.getKey()){
+                    postingsIterator.remove();
+                    int size = posting.getValue().getPositions().size();
+                    entry.getValue().decreaseFreqBy(size);
+                }
+                //Optimization
+                if(posting.getKey()>id)
+                    break;
+            }
+            //Remove if no more documents exist under that term
+            if(entry.getValue().getDocuments().size()==0){
+                termIterator.remove();
+            }
+        }
     }
 }

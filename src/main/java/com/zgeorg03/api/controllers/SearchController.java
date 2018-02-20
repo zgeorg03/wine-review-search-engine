@@ -42,9 +42,9 @@ public class SearchController {
         } catch (IOException e) {
             logger.info(e.getLocalizedMessage());
             return new SearchResponse("Something gone wrong with IO");
-        } catch (DocumentNotExists documentNotExists) {
-            documentNotExists.printStackTrace();
-            return new SearchResponse(documentNotExists.getLocalizedMessage());
+        } catch (DocumentNotExists e) {
+            logger.info(e.getLocalizedMessage());
+            return new SearchResponse(e.getLocalizedMessage());
         }
 
     }

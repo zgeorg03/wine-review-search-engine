@@ -12,10 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -24,6 +21,7 @@ public class FileManager {
     private final File root;
 
     private final Map<String,String> cache;
+    private final int cacheSize = 10000;
 
     @Autowired
     public FileManager(@Value("${root.path}") String path) throws Exception {
@@ -87,12 +85,13 @@ public class FileManager {
         }
 
         try {
-            dir.mkdir();
             File files[] = dir.listFiles();
             for(File file : files)
                 Files.delete(file.toPath());
             //Delete
             dir.delete();
+
+
             return true;
         }catch (SecurityException ex){
             throw new  NoPermissionsException(name);
@@ -135,6 +134,16 @@ public class FileManager {
 
         // MISS
         String content=Files.readAllLines(fp.toPath()).stream().collect(Collectors.joining("\n"));
+        if(cache.size()>cacheSize){
+            int toRemove = cacheSize/2;
+            Iterator<Map.Entry<String,String>> it = cache.entrySet().iterator();
+            while (toRemove>0 && it.hasNext()) {
+                it.next();
+                toRemove--;
+                it.remove();
+
+            }
+        }
         cache.put(path,content);
 
         return content;
@@ -159,4 +168,12 @@ public class FileManager {
         return Arrays.stream(root.list((x, y) -> x.isDirectory())).collect(Collectors.toList());
     }
 
+    public void deleteDocument(String collectionName, String document) throws DocumentNotExists {
+        File fp = Paths.get(root.getAbsolutePath(),collectionName,document).toFile();
+        if(!fp.isFile())
+            throw new DocumentNotExists(document);
+        fp.delete();
+
+
+    }
 }

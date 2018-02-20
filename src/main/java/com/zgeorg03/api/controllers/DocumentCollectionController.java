@@ -41,12 +41,22 @@ public class DocumentCollectionController {
         this.documentCollectionService = documentCollectionService;
     }
 
+    /**
+     * List available Collections
+     * @return
+     */
     @RequestMapping(value = "/",method = RequestMethod.GET)
     @ApiOperation(value = "List available collections")
     public List<CollectionInfo> listCollections(){
         return documentCollectionService.getCollections();
     }
 
+
+    /**
+     * List documents from a collection
+     * @param collection
+     * @return
+     */
     @RequestMapping(value = "/{collection}",method = RequestMethod.GET)
     @ApiOperation(value = "List documents from a collection")
     public ResponseEntity<InfoObjectResponse<Collection<String>>> listDocumentsFromCollection(@PathVariable String collection){
@@ -59,6 +69,11 @@ public class DocumentCollectionController {
         }
     }
 
+    /**
+     * Retrieve Collection's index
+     * @param collection
+     * @return
+     */
     @RequestMapping(value = "/{collection}/index",method = RequestMethod.GET)
     @ApiOperation(value = "Retrieve Collection's index")
     public ResponseEntity<InfoObjectResponse<CollectionIndex>> getCollectionIndex(@PathVariable String collection){
@@ -68,11 +83,34 @@ public class DocumentCollectionController {
                     index));
         } catch (CollectionNotFound e) {
             logger.info(e.getLocalizedMessage());
-            return ResponseEntity.ok(new InfoObjectResponse <>("Collection "+collection+" already exists",
+            return ResponseEntity.ok(new InfoObjectResponse <>("Collection "+collection+" not found",
+                    null));
+        }
+    }
+    /**
+     * Retrieve Collection's dictionary
+     * @param collection
+     * @return
+     */
+    @RequestMapping(value = "/{collection}/dictionary",method = RequestMethod.GET)
+    @ApiOperation(value = "Retrieve Collection's dictionary")
+    public ResponseEntity<InfoObjectResponse<Set<String>>> getCollectionDictionary(@PathVariable String collection){
+        try {
+            Set<String> dictionary = documentCollectionService.getCollectionDictionary(collection);
+            return ResponseEntity.ok(new InfoObjectResponse<>("Total terms:"+dictionary.size(), dictionary));
+        } catch (CollectionNotFound e) {
+            logger.info(e.getLocalizedMessage());
+            return ResponseEntity.ok(new InfoObjectResponse <>("Collection "+collection+" not found",
                     null));
         }
     }
 
+
+    /**
+     * Create a new collection
+     * @param collection
+     * @return
+     */
     @RequestMapping(value = "/{collection}",method = RequestMethod.POST)
     @ApiOperation(value = "Create a new collection")
     public ResponseEntity<InfoResponse> createNewCollection(@PathVariable String collection){
@@ -89,6 +127,12 @@ public class DocumentCollectionController {
         }
     }
 
+
+    /**
+     * Delete a collection
+     * @param collection
+     * @return
+     */
     @RequestMapping(value = "/{collection}",method = RequestMethod.DELETE)
     @ApiOperation(value = "Delete an existing collection")
     public ResponseEntity<InfoResponse> deleteCollection(@PathVariable String collection){
@@ -111,6 +155,7 @@ public class DocumentCollectionController {
 
     @RequestMapping(value = "/{collection}/document",method = RequestMethod.POST)
     @ApiOperation(value = "Insert document to an existing collection")
+
     public ResponseEntity<InfoResponse> insertDocument(@PathVariable String collection, @RequestParam("file") MultipartFile file){
         String name = file.getName();
         try {
@@ -140,20 +185,26 @@ public class DocumentCollectionController {
 
         int time = 0;
         try {
-            time = (int) (documentCollectionService.insertDocuments(collection, dir)/1000);
+            time = (int) (documentCollectionService.insertDocuments(collection, dir));
         } catch (CollectionNotFound e) {
             return ResponseEntity.ok(new InfoResponse("Collection "+collection+" not found"));
         }
 
-        return ResponseEntity.ok(new InfoResponse("Documents have been uploaded in "+time+" seconds"));
+        return ResponseEntity.ok(new InfoResponse("Documents have been uploaded in "+time+"ms"));
 
     }
 
-    @RequestMapping(value = "/{collection}/{document}",method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{collection}/document",method = RequestMethod.DELETE)
     @ApiOperation(value = "Delete document from a collection")
-    public ResponseEntity<InfoResponse> deleteDocument(@PathVariable String collection, @PathVariable String document){
-        documentCollectionService.deleteDocument(collection,document);
-        return ResponseEntity.ok(new InfoResponse("Document "+document+" deleted from collection "+collection));
+    public ResponseEntity<InfoResponse> deleteDocument(@PathVariable String collection, @RequestParam("document") String document){
+        try{
+            documentCollectionService.deleteDocument(collection,document);
+            return ResponseEntity.ok(new InfoResponse("Document "+document+" deleted from collection "+collection));
+        } catch (CollectionNotFound e) {
+            return ResponseEntity.ok(new InfoResponse("Collection "+collection+" not found"));
+        } catch (DocumentNotExists e) {
+            return ResponseEntity.ok(new InfoResponse(e.getLocalizedMessage()));
+        }
     }
 
 }

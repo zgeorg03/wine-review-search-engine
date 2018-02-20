@@ -3,6 +3,7 @@ package com.zgeorg03.core;
 import com.zgeorg03.StemmerService;
 import com.zgeorg03.StopListService;
 import com.zgeorg03.exceptions.DocumentFormatNotValid;
+import com.zgeorg03.exceptions.DocumentNotExists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ public class Collection implements Serializable {
     private final CollectionIndex collectionIndex;
 
     Map<Integer, String> filesMap = new HashMap<>();
+    Map<String, Integer> fileNamesMap = new HashMap<>();
 
     public Collection(String name, String absolutePath){
         this.name = name;
@@ -49,33 +51,28 @@ public class Collection implements Serializable {
 
             String descr = getDescriptionField(line);
 
-            StringTokenizer tokenizer = new StringTokenizer(descr, " \t\n\r\f-,.:;?![]'");
+            StringTokenizer tokenizer = new StringTokenizer(descr, " \t\n\r\f-,.:;?![]'\"()$&/”“—%");
 
             int position = 0;
-            int countStopWords=0;
-            int countIndexedWords=0;
             while(tokenizer.hasMoreTokens()){
                 String word = tokenizer.nextToken().toLowerCase();
 
 
                 // Skip if the word is a stop word
                 if(stopListService.isStopWord(word)) {
-                    countStopWords++;
                     position++;
                     continue;
                 }
 
                 //Stemming
                 String term = stemmerService.executeStemming(word);
-                //logger.info(position+":"+word+"\t"+term);
+                logger.debug(position+":"+word+"\t"+term);
                 collectionIndex.addTerm(term,id,position);
                 position++;
-                countIndexedWords++;
-
-
             }
 
             filesMap.put(id,file.getName());
+            fileNamesMap.put(file.getName(),id);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -125,6 +122,17 @@ public class Collection implements Serializable {
 
     public java.util.Collection<String> getDocuments() {
         return filesMap.values();
+    }
+
+    public void removeDocument(String document) throws DocumentNotExists {
+        Integer id = fileNamesMap.get(document);
+        if(id==null)
+            throw new DocumentNotExists(document);
+
+        collectionIndex.removeDocument(id);
+        filesMap.remove(id);
+        fileNamesMap.remove(document);
+
     }
 }
 

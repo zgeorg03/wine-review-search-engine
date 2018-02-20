@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DocumentCollectionService {
@@ -62,11 +63,8 @@ public class DocumentCollectionService {
      * @throws CollectionNotFound
      */
     public boolean deleteCollection(String name) throws CollectionNotFound, FileNotDeleted, NoPermissionsException {
-
         logger.info("Deleting new collection: " +name);
         collectionsManager.deleteCollection(name);
-
-        //TODO Consider revert-index
         return true;
     }
 
@@ -89,9 +87,9 @@ public class DocumentCollectionService {
      * @param document
      * @return
      */
-    public boolean deleteDocument(String collectionName, String document) {
+    public boolean deleteDocument(String collectionName, String document) throws CollectionNotFound, DocumentNotExists {
         logger.info("Deleting document "+document +" from collection: " +collectionName);
-        //TODO
+        collectionsManager.deleteDocument(collectionName,document);
         return true;
     }
 
@@ -119,6 +117,11 @@ public class DocumentCollectionService {
         return collectionsManager.getCollectionIndex(collection);
     }
 
+    public Set<String> getCollectionDictionary(String collection) throws CollectionNotFound {
+        return collectionsManager.getCollectionDictionary(collection);
+
+    }
+
     public SearchResponse search(String collection, String q) throws CollectionNotFound, QueryFormatNotValid, IOException, DocumentNotExists {
 
         List<DocumentInfo> documentInfoList = new LinkedList<>();
@@ -141,4 +144,5 @@ public class DocumentCollectionService {
         searchResponse.setResponseTime(time);
         return searchResponse;
     }
+
 }

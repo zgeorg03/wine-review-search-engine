@@ -9,12 +9,10 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller()
 public class IndexController {
 
-    /**
-    @RequestMapping(value = "/")
+    @RequestMapping(value = "/dashboard")
     public String getIndexHome(){
         return  "home";
     }
-    **/
 
 
     @GetMapping("/")

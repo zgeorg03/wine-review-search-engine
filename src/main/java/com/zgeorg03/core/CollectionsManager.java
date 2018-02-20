@@ -61,12 +61,12 @@ public class CollectionsManager implements Runnable, Serializable {
             throw new CollectionManagerNotExist();
         }
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-        System.out.println(in.available());
         int count = in.readInt();
         for(int i=0;i<count;i++){
             String key = in.readUTF();
             Collection collection = (Collection) in.readObject();
             this.collections.put(key,collection);
+            logger.info("Loaded collection: "+key+"(docs="+collection.getDocuments().size()+")");
         }
         in.close();
     }
@@ -140,7 +140,18 @@ public class CollectionsManager implements Runnable, Serializable {
      * @throws NoPermissionsException
      */
     public boolean deleteCollection(String name) throws CollectionNotFound, FileNotDeleted, NoPermissionsException {
-        return fileManager.deleteCollectionDirectory(name);
+        collections.remove(name);
+        fileManager.deleteCollectionDirectory(name);
+        try {
+            this.writeTo(this.file);
+        } catch (ClassNotFoundException e) {
+            logger.info(e.getLocalizedMessage());
+        } catch (CollectionManagerNotExist e) {
+            logger.info(e.getLocalizedMessage());
+        } catch (IOException e) {
+            logger.info(e.getLocalizedMessage());
+        }
+        return true;
     }
 
 
@@ -168,9 +179,9 @@ public class CollectionsManager implements Runnable, Serializable {
         try {
             this.writeTo(this.file);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (CollectionManagerNotExist collectionManagerNotExist) {
-            collectionManagerNotExist.printStackTrace();
+            logger.info(e.getLocalizedMessage());
+        } catch (CollectionManagerNotExist e) {
+            logger.info(e.getLocalizedMessage());
         }
 
 
@@ -189,7 +200,7 @@ public class CollectionsManager implements Runnable, Serializable {
             String documentName = file.getName();
             try {
                 InputStream in = new FileInputStream(file);
-                logger.info("Inserting document "+ documentName +" to directory: " +collection);
+                logger.info("Inserting document "+ documentName +" to directory: " +collectionName);
                 //Write to the disk
                 File fp =fileManager.insertDocumentFile(collectionName, documentName, in);
                 //Perform indexing
@@ -299,8 +310,37 @@ public class CollectionsManager implements Runnable, Serializable {
         if(collection==null)
             throw new CollectionNotFound(collectionName);
         String filename = collection.getFilesMap().get(docId);
+        if(filename==null)
+            throw  new DocumentNotExists(docId+"");
         String content = fileManager.getDocumentContents(collectionName,filename);
         return new DocumentInfo(docId, filename,content);
 
+    }
+
+    public void deleteDocument(String collectionName, String document) throws CollectionNotFound, DocumentNotExists {
+        Collection collection = collections.get(collectionName);
+        if(collection==null)
+            throw new CollectionNotFound(collectionName);
+        collection.removeDocument(document);
+        fileManager.deleteDocument(collectionName,document);
+
+        try {
+            this.writeTo(this.file);
+        } catch (ClassNotFoundException e) {
+            logger.info(e.getLocalizedMessage());
+        } catch (CollectionManagerNotExist e) {
+            logger.info(e.getLocalizedMessage());
+        } catch (IOException e) {
+            logger.info(e.getLocalizedMessage());
+        }
+
+    }
+
+    public Set<String> getCollectionDictionary(String collectionName) throws CollectionNotFound {
+        Collection collection = collections.get(collectionName);
+        if(collection==null)
+            throw new CollectionNotFound(collectionName);
+
+        return collection.getCollectionIndex().getDictionary().keySet();
     }
 }

@@ -20,7 +20,7 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-data/
+data/winedata.zip
 .idea/.name
 .idea/compiler.xml
 .idea/encodings.xml
@@ -72,3 +72,4 @@ target/classes/static/
 target/classes/templates/
 target/generated-test-sources/
 target/surefire-reports/
+!/data/small/

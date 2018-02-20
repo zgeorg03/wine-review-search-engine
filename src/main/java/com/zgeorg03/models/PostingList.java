@@ -33,24 +33,12 @@ public class PostingList implements Serializable{
 
     }
 
-    /**
-     * Return the documents id that are available in both posting lists
-     *
-     * @param other
-     * @return
-     */
-    public Set<Integer> intersect(PostingList other) {
-        Set<Integer> documents = new TreeSet<>();
-
-        Set<Integer> myEntries = this.documents.keySet();
-        Set<Integer> otherEntries = other.documents.keySet();
-        //TODO
-
+    public TreeMap<Integer, PositionsEntry> getDocuments() {
         return documents;
     }
 
-    public TreeMap<Integer, PositionsEntry> getDocuments() {
-        return documents;
+    public void decreaseFreqBy(int size) {
+        frequency-=size;
     }
     public int getFrequency() {
         return frequency;
@@ -67,4 +55,5 @@ public class PostingList implements Serializable{
                 ", documents=" + documents +
                 '}';
     }
+
 }
