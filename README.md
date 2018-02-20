@@ -37,7 +37,16 @@ The **PostingList** is another tree map structure having the document ID as a ke
 It also holds the term frequency. Finally, the **PositionsEntry** is a set of integers that holds the positions of the term 
 in the document.
 
+The **CollectionIndex** implements also the functionality of search. It support N query terms which can be negated and 
+concatenated using the boolean functions __and__ and __or__. It works simply starting from the most left term and depending on the boolean 
+condition it will intersect or union the two sets.
+
 For deleting a document, the program goes through the Collection's index and remove posting entries of that document.
+
+The **Utils** class implements 3 simple algorithms:
+* The intersection of two sorted sets
+* The union of two sets
+* The difference between two sets
 
 
 #### Data Layer
@@ -73,7 +82,7 @@ mvn clean && mvn package
 ```bash
 java -jar target/wine-search-engine-0.1.0.jar
 ```
-**Important** Make sure you have changed application.properties file which is located in the root directory.
+**Important** Make sure you have changed application.properties file located in the root directory.
 This file has 3 configuration properties:
 * The port of the server: Default is 8192
 * The local directory path to store collections: Default is /tmp/wines
@@ -82,7 +91,6 @@ This file has 3 configuration properties:
 ### How to use?
 You can simply visit http://localhost:8192 which redirects to the swagger-ui. From there you 
 can see and play with the REST API of the application.
-
 
 ### Tests
 *_scripts/_* directory contains bash scripts. You can run the application and 
