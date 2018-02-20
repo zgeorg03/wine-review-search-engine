@@ -34,9 +34,14 @@ This file has 3 configuration properties:
 * The local directory path to store collections: Default is /tmp/wines
 * The path to stopwords file: Default is /home/zgeorg03/git-projects/Msc/dionysos-wine-review-search-engine/data/stoplist.txt
 
+### How to use?
+You can simply visit http://localhost:8192 which redirects to the swagger-ui. From there you 
+can see and play with the REST API of the application.
+
+
 ### Tests
-In scripts/ directory some bash scripts exists. You can run the application and run these
-scripts to test is functionality.
+*_scripts/_* directory contains bash scripts. You can run the application and 
+execute these scripts in oder to test its functionality.
 
 ## Query Language
 
