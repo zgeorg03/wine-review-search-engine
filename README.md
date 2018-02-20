@@ -1,6 +1,51 @@
 # Dionysos Wine Review Search Engine
 A search engine for Dionysos wine reviews.
 
+## Description
+The program has been developed using [Spring Boot](https://projects.spring.io/spring-boot/), a framework for building
+web applications. The application consists of a Restful API which exposes the core functionality of the Search Engine.
+
+### High-Level Architecture
+![High Level Architecture](https://www.cs.ucy.ac.cy/~zgeorg03/public/wine-search-engine/architecture.png)
+
+#### REST API
+This layer consists of two controllers. The **DocumentCollectionController** exposes the functionality of creating
+or deleting a collection, inserting or removing documents and retrieving the index and dictionary of a collection. 
+The **SearchController** exposes the functionality of querying a collection of documents.
+Both controllers receive a request from a client and use the **DocumentCollectionService** to send back a respond.
+
+#### Core Modules
+
+The **DocumentCollectionService** exposes and implements all the functionality of the search engine, using the 
+**CollectionManager**. **CollectionManager** is the most important class, implementing the core functionality of the program.
+It holds all **Collections** in the main memory.
+
+**Collections** is hashmap data structure, mapping a the name of a collection to the **Collection** class.
+**Collection** is the class that contains the **CollectionIndex** and a hashmap for mapping document ids to filenames.  
+**Collection** also exposes the important function of adding a document. 
+
+The add document function works as follows:
+1. The document is loaded in main memory
+2. The document is parsed. The first field contains the id and the 3rd field contains the description, which is indexed.
+3. The description field is tokenized (based on whitespaces and some symbols)
+4. Each term is checked if is a stop word using the **StopListService**
+5. If term is not a stop word then the term passes through the Porter stemmer, using the **StemmerService**
+6. Finally the term is added to the **CollectionIndex**
+
+The **CollectionIndex**, is a tree map structure having the term as a key and a **PostingList** as a value
+The **PostingList** is another tree map structure having the document ID as a key and a **PositionsEntry** as a value. 
+It also holds the term frequency. Finally, the **PositionsEntry** is a set of integers that holds the positions of the term 
+in the document.
+
+For deleting a document, the program goes through the Collection's index and remove posting entries of that document.
+
+
+#### Data Layer
+Finally, in the Data layer the **FileManager** is responsible for creating/deleting 
+directories for collections and files for documents.
+After inserting/deleting a collection/document the **FileManager** performs the necessary operations to keep the **CollectionsManager** class 
+persistent. To achieve this, all classes used by the **CollectionsManager** implement Serializable interface.
+
 ## Functionality
 
 |Endpoint                               |Description                        |
